@@ -1,0 +1,15 @@
+{
+  "name": "node-rails-cookies",
+  "version": "0.0.0",
+  "description": "",
+  "main": "parse-cookie.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "https://github.com/botverse/node-rails-cookies.git",
+  "author": "Alfonso de la Osa",
+  "license": "MIT",
+  "dependencies": {
+    "bson": "~0.2.0"
+  }
+}
