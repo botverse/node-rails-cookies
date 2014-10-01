@@ -36,8 +36,7 @@ module.exports = function(options) {
             return new Buffer(part, 'base64');
           })
         ;
-console.log('message: ' + (new Buffer(message)).toString('base64'));
-console.log('parts[0]: ' + parts[0].toString('base64') + ' iv: ' + parts[1].toString('base64'));
+
       var cipher = crypto.createDecipheriv(cipherName, secret, parts[1])
         , part = new Buffer(cipher.update(parts[0])).toString('utf8')
         , final = cipher.final('utf8')
@@ -45,6 +44,7 @@ console.log('parts[0]: ' + parts[0].toString('base64') + ' iv: ' + parts[1].toSt
 
       return [part, final].join('');
     },
+
     encipher: function(message, cipherName, callback) {
       crypto.pseudoRandomBytes(16, function(err, iv) {
         if (err) {
@@ -56,7 +56,7 @@ console.log('parts[0]: ' + parts[0].toString('base64') + ' iv: ' + parts[1].toSt
           , final = cipher.final(),
           encryptedMessage = Buffer.concat([part, final]).toString('base64')
           ;
-console.log('encryptedMessage: ' + encryptedMessage + ' iv: ' + iv.toString('base64'));
+
         var fullMessage = new Buffer([encryptedMessage, iv.toString('base64')].join('--')).toString('base64')
           , hmac = crypto.createHmac('sha1', signed_secret)
           , digest
@@ -64,7 +64,7 @@ console.log('encryptedMessage: ' + encryptedMessage + ' iv: ' + iv.toString('bas
 
         hmac.update(fullMessage);
         digest = hmac.digest('hex');
-console.log('fullMessage: ' + fullMessage + ' digest: ' + digest);
+
         var cookie = [fullMessage, digest].join('--');
         callback(null, cookie);
       });
