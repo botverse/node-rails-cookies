@@ -19,29 +19,55 @@ module.exports = function(options) {
     , signed_secret = crypto.pbkdf2Sync(options.base, options.signed_salt, options.iterations, options.keylen)
     ;
 
-  return function(cookie, cipherName) {
+  return {
+    decipher: function(cookie, cipherName) {
+      var signed_parts = cookie.split('--')
+        , hmac = crypto.createHmac('sha1', signed_secret)
+        , digest
+        ;
 
-    var signed_parts = cookie.split('--')
-      , hmac = crypto.createHmac('sha1', signed_secret)
-      , digest
-      ;
+      hmac.update(signed_parts[0]);
+      digest = hmac.digest('hex');
 
-    hmac.update(signed_parts[0]);
-    digest = hmac.digest('hex');
+      if ( !compare(signed_parts[1], digest) ) return console.log('not valid');
 
-    if ( !compare(signed_parts[1], digest) ) return console.log('not valid');
+      var message = (new Buffer(signed_parts[0], 'base64').toString())
+        , parts = message.split('--').map(function(part) {
+            return new Buffer(part, 'base64');
+          })
+        ;
+console.log('message: ' + (new Buffer(message)).toString('base64'));
+console.log('parts[0]: ' + parts[0].toString('base64') + ' iv: ' + parts[1].toString('base64'));
+      var cipher = crypto.createDecipheriv(cipherName, secret, parts[1])
+        , part = new Buffer(cipher.update(parts[0])).toString('utf8')
+        , final = cipher.final('utf8')
+        ;
 
-    var message = (new Buffer(signed_parts[0], 'base64').toString())
-      , parts = message.split('--').map(function(part) {
-          return new Buffer(part, 'base64');
-        })
-      ;
+      return [part, final].join('');
+    },
+    encipher: function(message, cipherName, callback) {
+      crypto.pseudoRandomBytes(16, function(err, iv) {
+        if (err) {
+          callback(err);
+        }
 
-    var cipher = crypto.createDecipheriv(cipherName, secret, parts[1])
-      , part = new Buffer(cipher.update(parts[0])).toString('utf8')
-      , final = cipher.final('utf8')
-      ;
+        var cipher = crypto.createCipheriv(cipherName, secret, iv)
+          , part = new Buffer(cipher.update(new Buffer(message)))
+          , final = cipher.final(),
+          encryptedMessage = Buffer.concat([part, final]).toString('base64')
+          ;
+console.log('encryptedMessage: ' + encryptedMessage + ' iv: ' + iv.toString('base64'));
+        var fullMessage = new Buffer([encryptedMessage, iv.toString('base64')].join('--')).toString('base64')
+          , hmac = crypto.createHmac('sha1', signed_secret)
+          , digest
+          ;
 
-    return [part, final].join('');
+        hmac.update(fullMessage);
+        digest = hmac.digest('hex');
+console.log('fullMessage: ' + fullMessage + ' digest: ' + digest);
+        var cookie = [fullMessage, digest].join('--');
+        callback(null, cookie);
+      });
+    }
   }
 };
