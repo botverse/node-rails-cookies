@@ -13,7 +13,7 @@ var cookie = "bEtaTXFvOHlCQjliaVBUUi9BMVB6aFcyeHE5MFJ3YjFaZ1ZHREk5anltUWpxMEgwZk
   ;
 
 /* The original test is broken, even after fixing the usage of the BSON library.
-   I'll let the individual author address this. --endotronic
+   I'll let the original author address this. --endotronic
 
 decryptor = parser(params);
 message = decryptor(cookie, cipher);
