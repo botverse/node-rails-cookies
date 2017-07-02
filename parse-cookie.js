@@ -15,8 +15,8 @@ function compare(a, b) {
 }
 
 module.exports = function(options) {
-  var secret = crypto.pbkdf2Sync(options.base, options.salt, options.iterations, options.keylen / 2)
-    , signed_secret = crypto.pbkdf2Sync(options.base, options.signed_salt, options.iterations, options.keylen)
+  var secret = crypto.pbkdf2Sync(options.base, options.salt, options.iterations, options.keylen / 2, 'sha1')
+    , signed_secret = crypto.pbkdf2Sync(options.base, options.signed_salt, options.iterations, options.keylen, 'sha1')
     ;
 
   var decrypter = function(cookie, cipherName) {
